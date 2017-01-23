@@ -10,14 +10,21 @@ if platform.system() == "Darwin":
     for path in PATHS:
 
         print("Checking for %s in %s... " % (AFFDEX_FRAMEWORK, path), end='')
-        searchpath = os.path.expanduser("%s/%s"%(path, AFFDEX_LIB))
+        libpath = os.path.expanduser("%s/%s"%(path, AFFDEX_LIB))
+        fwpath = os.path.expanduser("%s/%s"%(path, AFFDEX_FRAMEWORK))
 
-        if os.path.isfile(searchpath):
+        if os.path.isfile(libpath):
             print("found")
 
             import objc
-            objc.loadBundle("Affdex", globals(), bundle_path="%s/%s" % (path, AFFDEX_FRAMEWORK))
+            __bundle__ = objc.initFrameworkWrapper(\
+                "Affdex", \
+                frameworkIdentifier = "com.affectiva.Affdex", \
+                frameworkPath = objc.pathForFramework(fwpath), \
+                globals = globals())
+
             found = True
+
             break
         else:
             print("not found")
