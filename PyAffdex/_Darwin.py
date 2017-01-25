@@ -155,10 +155,37 @@ class PyAFDXDetector:
 
         self._detector = AFDXDetector.alloc().init()
 
-        #ObjC provides 7 different init methods
-        if (len(kwargs) is 4 and 'discreteImages' in kwargs and 'maximumFaces' in kwargs and 'faceMode' in kwargs and 'delegate' in kwargs):
-            self._instance = self._detector.initWithDelegate_discreteImages_maximumFaces_faceMode_(kwargs.get('delegate'), kwargs.get('discreteImages'), kwargs.get('maximumFaces'), kwargs.get('faceMode'))
+        if (len(kwargs) is 3 and 'delegate' in kwargs and 'usingCaptureDevice' in kwargs and 'maximumFaces' in kwargs):
+            self._instance = self._detector.initWithDelegate_usingCaptureDevice_maximumFaces_(kwargs.get('delegate'), kwargs.get('usingCaptureDevice'), kwargs.get('maximumFaces'))
             self._delegate = kwargs.get('delegate')
+
+        elif (len(kwargs) is 3 and 'delegate' in kwargs and 'usingCamera' in kwargs and 'maximumFaces' in kwargs):
+            self._instance = self._detector.initWithDelegate_usingCamera_maximumFaces_(kwargs.get('delegate'), kwargs.get('usingCamera'), kwargs.get('maximumFaces'))
+            self._delegate = kwargs.get('delegate')
+
+        elif (len(kwargs) is 4 and 'delegate' in kwargs and 'usingCamera' in kwargs and 'maximumFaces' in kwargs and 'faceMode' in kwargs):
+            self._instance = self._detector.initWithDelegate_usingCamera_maximumFaces_faceMode_(kwargs.get('delegate'), kwargs.get('usingCamera'), kwargs.get('maximumFaces'), kwargs.get('faceMode').value)
+            self._delegate = kwargs.get('delegate')
+
+        elif (len(kwargs) is 3 and 'delegate' in kwargs and 'usingFile' in kwargs and 'maximumFaces' in kwargs):
+            self._instance = self._detector.initWithDelegate_usingFile_maximumFaces_(kwargs.get('delegate'), kwargs.get('usingFile'), kwargs.get('maximumFaces'))
+            self._delegate = kwargs.get('delegate')
+
+        elif (len(kwargs) is 4 and 'delegate' in kwargs and 'usingFile' in kwargs and 'maximumFaces' in kwargs and 'faceMode' in kwargs):
+            self._instance = self._detector.initWithDelegate_usingFile_maximumFaces_faceMode_(kwargs.get('delegate'), kwargs.get('usingFile'), kwargs.get('maximumFaces'), kwargs.get('faceMode').value)
+            self._delegate = kwargs.get('delegate')
+
+        elif (len(kwargs) is 3 and 'delegate' in kwargs and 'discreteImages' in kwargs and 'maximumFaces' in kwargs):
+            self._instance = self._detector.initWithDelegate_discreteImages_maximumFaces_(kwargs.get('delegate'), kwargs.get('discreteImages'), kwargs.get('maximumFaces'))
+            self._delegate = kwargs.get('delegate')
+
+        elif (len(kwargs) is 4 and 'delegate' in kwargs and 'discreteImages' in kwargs and 'maximumFaces' in kwargs and 'faceMode' in kwargs):
+            self._instance = self._detector.initWithDelegate_discreteImages_maximumFaces_faceMode_(kwargs.get('delegate'), kwargs.get('discreteImages'), kwargs.get('maximumFaces'), kwargs.get('faceMode').value)
+            self._delegate = kwargs.get('delegate')
+
+        else:
+            raise ValueError("Named arguments did not match a initializer.")
+
 
     def detectAllEmotions(self, bool):
         self._detector.setDetectAllEmotions_(bool)
@@ -169,9 +196,11 @@ class PyAFDXDetector:
     def detectAllEmojis(self, bool):
         self._detector.setDetectEmojis_(bool)
 
-    # reaaalllly dont want to write these all out....
-    def joy(self):
-        return self._detector.joy() == 1
+    def detect(self, **kwargs):
+        for name in kwargs:
+            if hasattr(self._detector, name):
+                (getattr(self._detector, "set" + name[0].upper() + name[1:] + "_")(kwargs.get(name)))
+                print("Set classifier '%s' to %s" % (name, kwargs.get(name) is 1))
 
     def isRunning(self):
         return self._detector.isRunning() == 1
@@ -201,7 +230,7 @@ class PyAFDXDetector:
     def delegate(self):
         return self._delegate
 
-# This should be overridden by the client. Also provides supports more 'Pythonic' class function names
+# This should be overridden by the client. Also provides supports more 'Pythonic' class function names and parameter types
 class PyAFDXDetectorDelegate():
 
     def detectorDidFinishProcessing_(self, detector):
