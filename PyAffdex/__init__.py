@@ -1,4 +1,5 @@
 import platform, os, sys
+from enum import Enum
 
 _DARWIN = False
 _WINDOWS = False
@@ -30,25 +31,38 @@ def createPyAFDXFaceFromAFDXFace():
 #
 # API Classes
 #
+class PyAFDXAge(Enum):
+    Unknown = 0,
+    Under18 = 1,
+    Between18and24 = 2
+    Between25and34 = 3
+    Between35and44 = 4
+    Between45and54 = 5
+    Between55and64 = 6
+    OlderThan65 = 7
 
-class PyAFDXFace(object):
-    def __init__(self, id):
-        self._id = id
-        self._orientation = None
+class PyAFDXEmoji(Enum):
+    Disappointed = 128542
+    Flushed = 128563
+    Kissing = 128535
+    Laughing = 128518
+    Rage = 128545
+    Relaxed = 9786
+    Scream = 128561
+    Smily = 128515
+    Smirk = 128527
+    StuckOutTongue = 128539
+    StuckOutTongueWinkingEye = 128540
+    Unknown = 128528
+    Wink = 128521
 
-    def id(self):
-        return self._id
-
-    def orientation(self, orientation=None):
-        return self._orientation
-
-class PyAFDXOrientation(object):
-
-    def __init__(self, yaw=None, pitch=None, roll=None, interocularDistance=None):
-        self._yaw = yaw
-        self._pitch = pitch
-        self._roll = roll
-        self._interocularDistance = interocularDistance
+class PyAFDXEthnicity(Enum):
+    BlackAfrican = 2
+    Caucasian = 1
+    EastAsian = 4
+    Hispanic = 5
+    SouthAsian = 3
+    Unknown = 0
 
 #
 # Platform-specific Wrapper Classes
