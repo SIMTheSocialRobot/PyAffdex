@@ -23,12 +23,6 @@ else:
     raise ImportError("Unsupported System: %s" % platform.system())
 
 #
-# API Functions
-#
-def createPyAFDXFaceFromAFDXFace():
-    return None
-
-#
 # API Classes
 #
 class PyAFDXAge(Enum):
@@ -40,6 +34,10 @@ class PyAFDXAge(Enum):
     Between45and54 = 5
     Between55and64 = 6
     OlderThan65 = 7
+
+class PyAFDXCameraType(Enum):
+    Front = 1
+    Back = 2
 
 class PyAFDXEmoji(Enum):
     Disappointed = 128542
@@ -63,6 +61,10 @@ class PyAFDXEthnicity(Enum):
     Hispanic = 5
     SouthAsian = 3
     Unknown = 0
+
+class PyAFDXFaceDetectionMode(Enum):
+    Large = 0
+    Small = 1
 
 #
 # Platform-specific Wrapper Classes
