@@ -1,6 +1,5 @@
 import objc, os
 from . import *
-from Foundation import NSObject
 
 AFFDEX_FRAMEWORK = "Affdex.framework"
 AFFDEX_FRAMEWORK_PATHS = [ "/Library/Frameworks", "/System/Library/Frameworks", "~/Library/Frameworks", "./" ]
@@ -43,11 +42,117 @@ def _loadAffdexFramework(fwPath):
         frameworkPath = objc.pathForFramework(fwPath), \
         globals = globals())
 
+def _createDictFromAFDXAppearance(afdxAppearance):
+    appearance = {
+        'age': afdxAppearance.age(),
+        'ethnicity': afdxAppearance.ethnicity(),
+        'gender': afdxAppearance.gender(),
+        'glasses': afdxAppearance.glasses() == 1
+    }
+    return appearance;
+
+def _createDictFromAFDXEmojis(afdxEmojis):
+    emojis = {
+        'disappointed': afdxEmojis.disappointed(),
+        'dominantEmoji': afdxEmojis.dominantEmoji(),
+        'flushed': afdxEmojis.flushed(),
+        'kissing': afdxEmojis.kissing(),
+        'laughing': afdxEmojis.laughing(),
+        'rage': afdxEmojis.rage(),
+        'relaxed': afdxEmojis.relaxed(),
+        'scream': afdxEmojis.scream(),
+        'smiley': afdxEmojis.smiley(),
+        'smirk': afdxEmojis.smirk(),
+        'stuckOutTongue': afdxEmojis.stuckOutTongue(),
+        'stuckOutTongueWinkingEye': afdxEmojis.stuckOutTongueWinkingEye(),
+        'wink': afdxEmojis.wink()
+
+    }
+    return emojis
+
+def _createDictFromAFDXEmotions(afdxEmotions):
+    emotions = {
+        'anger': afdxEmotions.anger(),
+        'contempt': afdxEmotions.contempt(),
+        'disgust': afdxEmotions.disgust(),
+        'engagement': afdxEmotions.engagement(),
+        'fear': afdxEmotions.fear(),
+        'joy': afdxEmotions.joy(),
+        'sadness': afdxEmotions.sadness(),
+        'surprise': afdxEmotions.surprise(),
+        'valence': afdxEmotions.valence()
+    }
+    return emotions
+
+def _createDictFromAFDXExpressions(afdxExpressions):
+    expressions = {
+        'attention': afdxExpressions.attention(),
+        'browFurrow': afdxExpressions.browFurrow(),
+        'browRaise': afdxExpressions.browRaise(),
+        'cheekRaise': afdxExpressions.cheekRaise(),
+        'chinRaise': afdxExpressions.chinRaise(),
+        'dimpler': afdxExpressions.dimpler(),
+        'eyeClosure': afdxExpressions.eyeClosure(),
+        'eyeWiden': afdxExpressions.eyeWiden(),
+        'innerBrowRaise': afdxExpressions.innerBrowRaise(),
+        'jawDrop': afdxExpressions.jawDrop(),
+        'lidTighten': afdxExpressions.lidTighten(),
+        'lipCornerDepressor': afdxExpressions.lipCornerDepressor(),
+        'lipPress': afdxExpressions.lipPress(),
+        'lipPucker': afdxExpressions.lipPucker(),
+        'lipStretch': afdxExpressions.lipStretch(),
+        'lipSuck': afdxExpressions.lipSuck(),
+        'mouthOpen': afdxExpressions.mouthOpen(),
+        'noseWrinkle': afdxExpressions.noseWrinkle(),
+        'smile': afdxExpressions.smile(),
+        'smirk': afdxExpressions.smirk(),
+        'upperLipRaise': afdxExpressions.upperLipRaise(),
+
+    }
+    return expressions
+
+def _createDictFromAFDXFace(afdxFace):
+    face = {
+        'appearance': _createDictFromAFDXAppearance(afdxFace.appearance()),
+        'emojis': _createDictFromAFDXEmojis(afdxFace.emojis()),
+        'emotions': _createDictFromAFDXEmotions(afdxFace.emotions()),
+        'expressions': _createDictFromAFDXExpressions(afdxFace.expressions()),
+        'faceBounds': _createDictFromCGRect(afdxFace.faceBounds()),
+        'facePoints': _createListFromNSArrayOfNSPoints(afdxFace.facePoints()),
+        'id': afdxFace.faceId(),
+        'orientation': _createDictFromAFDXOrientation(afdxFace.orientation()),
+        'userInfo': afdxFace.userInfo()
+    }
+    return face;
+
+def _createDictFromAFDXOrientation(afdxOrientation):
+    orientation = {
+        'interocularDistance': afdxOrientation.interocularDistance(),
+        'pitch': afdxOrientation.pitch(),
+        'roll': afdxOrientation.roll(),
+        'yaw': afdxOrientation.yaw()
+    }
+    return orientation;
+
+def _createDictFromCGRect(cgRect):
+    # pyobjc gives it to us as a tuple
+    return cgRect
+
+def _createListFromNSArrayOfNSPoints(nsArray):
+    # tuple of NSPoints
+    array = []
+    for point in nsArray:
+        pass
+        #NSConcreteValue?
+        #array.append(point)
+    return array
+
 class PyAFDXDetector:
+
     def __init__(self, *args, **kwargs):
         if (len(args) > 0):
             raise ValueError("All arguments must be named.")
-        
+
         self._detector = AFDXDetector.alloc().init()
 
         #ObjC provides 7 different init methods
@@ -96,7 +201,7 @@ class PyAFDXDetector:
     def delegate(self):
         return self._delegate
 
-# This should be overridden by the client. Also provides more 'Pythonic' class function names
+# This should be overridden by the client. Also provides supports more 'Pythonic' class function names
 class PyAFDXDetectorDelegate():
 
     def detectorDidFinishProcessing_(self, detector):
@@ -118,7 +223,12 @@ class PyAFDXDetectorDelegate():
             print(">> PyAFDXDetectorDelegate.didStopDetectingFace (default implementation)")
 
     def detector_hasResults_forImage_atTime_(self, detector, faces, image, time):
-        if "hasResults" in dir(self):
-            self.hasResults(detector, faces, image, time)
+        if "hasResults" in dir(self) and faces is not None:
+
+            facesList = []
+            for face in faces:
+                facesList.append(_createDictFromAFDXFace(faces[face]))
+
+            self.hasResults(detector, facesList)
         else:
             print(">> PyAFDXDetectorDelegate.hasResults (default implementation)")
