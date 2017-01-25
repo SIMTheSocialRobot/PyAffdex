@@ -1,121 +1,65 @@
-import platform, os
+import platform, os, sys
+
+_DARWIN = False
+_WINDOWS = False
+_LINUX = False
+
+sys.tracebacklimit = 0
 
 if platform.system() == "Darwin":
-    AFFDEX_FRAMEWORK = "Affdex.framework"
-    AFFDEX_LIB = "%s/%s" % (AFFDEX_FRAMEWORK, "Affdex")
+    from ._Darwin import findAndLoadAffdexFramework
+    findAndLoadAffdexFramework()
+    _DARWIN = True
+    # import all the OSX-specifics
+    from . import _Darwin
+    from ._Darwin import PyAFDXDetectorDelegate
 
-    PATHS = [ "/Library/Frameworks", "/System/Library/Frameworks", "~/Library/Frameworks", "./" ]
-    found = False
-
-    for path in PATHS:
-
-        print("Checking for %s in %s... " % (AFFDEX_FRAMEWORK, path), end='')
-        libpath = os.path.expanduser("%s/%s"%(path, AFFDEX_LIB))
-        fwpath = os.path.expanduser("%s/%s"%(path, AFFDEX_FRAMEWORK))
-
-        if os.path.isfile(libpath):
-            print("found")
-
-            import objc
-            __bundle__ = objc.initFrameworkWrapper(\
-                "Affdex", \
-                frameworkIdentifier = "com.affectiva.Affdex", \
-                frameworkPath = objc.pathForFramework(fwpath), \
-                globals = globals())
-
-            found = True
-
-            break
-        else:
-            print("not found")
-    
-    if not found:
-        raise ImportError("Cound not find `Affdex.framework` in any of these locations: %s" % PATHS)
-
+elif platform.system() == "Windows":
+    #raise ImportError("Not yet implemented")
+    _WINDOWS = True
+    pass
 else:
     raise ImportError("Unsupported System: %s" % platform.system())
 
-# Really want to break these classes into seperate files, but then the types loaded from objc become hidden?
+#
+# API Functions
+#
+def createPyAFDXFaceFromAFDXFace():
+    return None
 
-# ---------
-# Delegates (Unique to Objective-C)
-# ---------
-class PyAFDXDetectorDelegate(NSObject):
-    def init(self):
-        return self
+#
+# API Classes
+#
 
-    def detectorDidFinishProcessing_(self, detector):
-        print("detectorDidFinishProcessing");
+class PyAFDXFace(object):
+    def __init__(self, id):
+        self._id = id
+        self._orientation = None
 
-    def detector_didStartDetectingFace_(self, detector, face):
-        print("didStartDetectingFace")
-        print(detector)
-        print(face)
+    def id(self):
+        return self._id
 
-    def detector_didStopDetectingFace_(self, detector, face):
-        print("didStopDetectingFace")
-        print(detector)
-        print(face)
+    def orientation(self, orientation=None):
+        return self._orientation
 
-    def detector_hasResults_forImage_atTime_(self, detector, results, image, time):
-        print("hasResults")
-        print(detector)
-        print(results)
-        print(image)
-        print(time)
+class PyAFDXOrientation(object):
 
-# -------
-# Classes
-# -------
-class PyAFDXDetector:
-    def __init__(self, *args, **kwargs):
-        if (len(args) > 0):
-            raise ValueError("All arguments must be named.")
+    def __init__(self, yaw=None, pitch=None, roll=None, interocularDistance=None):
+        self._yaw = yaw
+        self._pitch = pitch
+        self._roll = roll
+        self._interocularDistance = interocularDistance
 
-        self._detector = AFDXDetector.alloc().init()
+#
+# Platform-specific Wrapper Classes
+#
 
-        #ObjC provides 7 different init methods
-        if (len(kwargs) is 4 and 'discreteImages' in kwargs and 'maximumFaces' in kwargs and 'faceMode' in kwargs and 'delegate' in kwargs):
-            self._instance = self._detector.initWithDelegate_discreteImages_maximumFaces_faceMode_(kwargs.get('delegate'), kwargs.get('discreteImages'), kwargs.get('maximumFaces'), kwargs.get('faceMode'))
-            self._instance.setDelegate_(kwargs.get('delegate'))
+if _DARWIN:
+    class PyAFDXDetector(_Darwin.PyAFDXDetector):
+        pass
 
-    def detectAllEmotions(self, bool):
-        self._detector.setDetectAllEmotions_(bool)
+elif _WINDOWS:
+    from . import _Windows
 
-    def detectAllExpressions(self, bool):
-        self._detector.setDetectAllExpressions_(bool)
-
-    def detectAllEmojis(self, bool):
-        self._detector.setDetectEmojis_(bool)
-
-    # reaaalllly dont want to write these all out....
-    def joy(self):
-        return self._detector.joy() == 1
-
-    def isRunning(self):
-        return self._detector.isRunning() == 1
-
-    def start(self):
-        started = self._detector.start()
-        if started is not None:
-            raise ValueError("oops")
-
-    def stop(self):
-        stopped = self._detector.stop()
-        if stopped is not None:
-            raise ValueError("oops")
-
-    def reset(self):
-        reset = self._detector.reset()
-        if reset is not None:
-            raise ValueError("oops")
-
-    def processImage(self, pathToPicture):
-        if os.path.isfile(pathToPicture):
-            image = NSImage.alloc().initWithContentsOfFile_(pathToPicture)
-            self._detector.processImage_(image)
-        else:
-            raise ValueError("%s not found" % (pathToPicture))
-
-    def delegate(self):
-        return self._delegate
+    class PyAFDXDetector(_Windows.PyAFDXDetector):
+        pass
