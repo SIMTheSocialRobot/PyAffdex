@@ -168,12 +168,20 @@ class PyAFDXDetector:
             self._delegate = kwargs.get('delegate')
 
         elif (len(kwargs) is 3 and 'delegate' in kwargs and 'usingFile' in kwargs and 'maximumFaces' in kwargs):
-            self._instance = self._detector.initWithDelegate_usingFile_maximumFaces_(kwargs.get('delegate'), kwargs.get('usingFile'), kwargs.get('maximumFaces'))
-            self._delegate = kwargs.get('delegate')
+            file = os.path.abspath(kwargs.get('usingFile'))
+            if os.path.isfile(file):
+                self._instance = self._detector.initWithDelegate_usingFile_maximumFaces_(kwargs.get('delegate'), kwargs.get('usingFile'), kwargs.get('maximumFaces'))
+                self._delegate = kwargs.get('delegate')
+            else:
+                raise ValueError("%s not found" % (file))
 
         elif (len(kwargs) is 4 and 'delegate' in kwargs and 'usingFile' in kwargs and 'maximumFaces' in kwargs and 'faceMode' in kwargs):
-            self._instance = self._detector.initWithDelegate_usingFile_maximumFaces_faceMode_(kwargs.get('delegate'), kwargs.get('usingFile'), kwargs.get('maximumFaces'), kwargs.get('faceMode').value)
-            self._delegate = kwargs.get('delegate')
+            file = os.path.abspath(kwargs.get('usingFile'))
+            if os.path.isfile(file):
+                self._instance = self._detector.initWithDelegate_usingFile_maximumFaces_faceMode_(kwargs.get('delegate'), kwargs.get('usingFile'), kwargs.get('maximumFaces'), kwargs.get('faceMode').value)
+                self._delegate = kwargs.get('delegate')
+            else:
+                raise ValueError("%s not found" % (file))
 
         elif (len(kwargs) is 3 and 'delegate' in kwargs and 'discreteImages' in kwargs and 'maximumFaces' in kwargs):
             self._instance = self._detector.initWithDelegate_discreteImages_maximumFaces_(kwargs.get('delegate'), kwargs.get('discreteImages'), kwargs.get('maximumFaces'))
