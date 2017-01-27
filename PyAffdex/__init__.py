@@ -1,5 +1,5 @@
 import platform, os, sys
-from enum import Enum
+from enum import IntEnum
 
 _DARWIN = False
 _WINDOWS = False
@@ -16,16 +16,18 @@ if platform.system() == "Darwin":
     from ._Darwin import PyAFDXDetectorDelegate
 
 elif platform.system() == "Windows":
-    #raise ImportError("Not yet implemented")
+    raise ImportError("Not yet implemented")
     _WINDOWS = True
+    from . import _Windows
     pass
+
 else:
     raise ImportError("Unsupported System: %s" % platform.system())
 
 #
 # API Classes
 #
-class PyAFDXAge(Enum):
+class Age(IntEnum):
     Unknown = 0,
     Under18 = 1,
     Between18and24 = 2
@@ -35,11 +37,11 @@ class PyAFDXAge(Enum):
     Between55and64 = 6
     OlderThan65 = 7
 
-class PyAFDXCameraType(Enum):
+class CameraType(IntEnum):
     Front = 1
     Back = 2
 
-class PyAFDXEmoji(Enum):
+class Emoji(IntEnum):
     Disappointed = 128542
     Flushed = 128563
     Kissing = 128535
@@ -54,7 +56,7 @@ class PyAFDXEmoji(Enum):
     Unknown = 128528
     Wink = 128521
 
-class PyAFDXEthnicity(Enum):
+class Ethnicity(IntEnum):
     BlackAfrican = 2
     Caucasian = 1
     EastAsian = 4
@@ -62,9 +64,14 @@ class PyAFDXEthnicity(Enum):
     SouthAsian = 3
     Unknown = 0
 
-class PyAFDXFaceDetectionMode(Enum):
+class FaceDetectionMode(IntEnum):
     Large = 0
     Small = 1
+
+class Gender(IntEnum):
+    Unknown = 0,
+    Male = 1,
+    Female = 2
 
 #
 # Platform-specific Wrapper Classes
