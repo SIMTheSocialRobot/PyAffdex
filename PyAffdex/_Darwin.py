@@ -187,6 +187,9 @@ class PyAFDXDetector:
             raise ValueError("Named arguments did not match a initializer.")
 
 
+    def detectAllAppearances(self, bool):
+        self._detector.setDetectAllAppearances_(bool)
+
     def detectAllEmotions(self, bool):
         self._detector.setDetectAllEmotions_(bool)
 
@@ -205,6 +208,28 @@ class PyAFDXDetector:
     def isRunning(self):
         return self._detector.isRunning() == 1
 
+    def maxProcessRate(self, rate=None):
+        if rate is None:
+            return self._detector.maxProcessRate()
+        else:
+            pass
+            #self._detector.maxProcessRate(rate)
+
+    def processImage(self, pathToPicture, time=None):
+        if os.path.isfile(pathToPicture):
+            image = NSImage.alloc().initWithContentsOfFile_(pathToPicture)
+            if time is None:
+                self._detector.processImage_(image)
+            else:
+                self._detector.processImage_atTime_(image, time)
+        else:
+            raise ValueError("%s not found" % (pathToPicture))
+
+    def reset(self):
+        reset = self._detector.reset()
+        if reset is not None:
+            raise ValueError("oops")
+
     def start(self):
         started = self._detector.start()
         if started is not None:
@@ -215,20 +240,8 @@ class PyAFDXDetector:
         if stopped is not None:
             raise ValueError("oops")
 
-    def reset(self):
-        reset = self._detector.reset()
-        if reset is not None:
-            raise ValueError("oops")
-
-    def processImage(self, pathToPicture):
-        if os.path.isfile(pathToPicture):
-            image = NSImage.alloc().initWithContentsOfFile_(pathToPicture)
-            self._detector.processImage_(image)
-        else:
-            raise ValueError("%s not found" % (pathToPicture))
-
-    def delegate(self):
-        return self._delegate
+    def version(self):
+        return self._detector.version()
 
 # This should be overridden by the client. Also provides supports more 'Pythonic' class function names and parameter types
 class PyAFDXDetectorDelegate():
@@ -253,7 +266,6 @@ class PyAFDXDetectorDelegate():
 
     def detector_hasResults_forImage_atTime_(self, detector, faces, image, time):
         if "hasResults" in dir(self) and faces is not None:
-
             facesList = []
             for face in faces:
                 facesList.append(_createDictFromAFDXFace(faces[face]))
