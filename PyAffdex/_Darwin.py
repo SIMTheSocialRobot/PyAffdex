@@ -1,5 +1,5 @@
+import PyAffdex
 import objc, os
-from . import *
 
 AFFDEX_FRAMEWORK = "Affdex.framework"
 AFFDEX_FRAMEWORK_PATHS = [ "/Library/Frameworks", "/System/Library/Frameworks", "~/Library/Frameworks", "./" ]
@@ -44,9 +44,9 @@ def _loadAffdexFramework(fwPath):
 
 def _createDictFromAFDXAppearance(afdxAppearance):
     appearance = {
-        'age': afdxAppearance.age(),
-        'ethnicity': afdxAppearance.ethnicity(),
-        'gender': afdxAppearance.gender(),
+        'age': PyAffdex.Age(afdxAppearance.age()),
+        'ethnicity': PyAffdex.Ethnicity(afdxAppearance.ethnicity()),
+        'gender': PyAffdex.Gender(afdxAppearance.gender()),
         'glasses': afdxAppearance.glasses() == 1
     }
     return appearance;
@@ -54,7 +54,7 @@ def _createDictFromAFDXAppearance(afdxAppearance):
 def _createDictFromAFDXEmojis(afdxEmojis):
     emojis = {
         'disappointed': afdxEmojis.disappointed(),
-        'dominantEmoji': afdxEmojis.dominantEmoji(),
+        'dominantEmoji': PyAffdex.Emoji(afdxEmojis.dominantEmoji()),
         'flushed': afdxEmojis.flushed(),
         'kissing': afdxEmojis.kissing(),
         'laughing': afdxEmojis.laughing(),
